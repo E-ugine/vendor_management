@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vms_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - vms_network
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15-alpine
+    container_name: vms_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vendor_management
+      POSTGRES_USER: vms_user
+      POSTGRES_PASSWORD: vms_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vms_network
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: vms_redis
+    restart: unless-stopped
+    networks:
+      - vms_network
+    ports:
+      - "6379:6379"
+
+networks:
+  vms_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
