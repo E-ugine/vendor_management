@@ -51,31 +51,34 @@ protected $attributes = [
 
     // Core business logic: Stage transitions
     public function transitionTo(VendorStage $newStage, string $action, ?string $comment = null, ?int $actorId = null)
-    {
-        DB::transaction(function () use ($newStage, $action, $comment, $actorId) {
-            // Update vendor stage
-            $this->current_stage = $newStage;
-            
-            // Update status based on action
-            if ($action === 'rejected') {
-                $this->status = VendorStatus::REJECTED;
-            } elseif ($newStage === VendorStage::APPROVED) {
-                $this->status = VendorStatus::APPROVED;
-            }
-            
-            $this->save();
+{
+    DB::transaction(function () use ($newStage, $action, $comment, $actorId) {
+        // Update vendor stage
+        $this->current_stage = $newStage;
+        
+        // Update status based on action
+        if ($action === 'rejected') {
+            $this->status = VendorStatus::REJECTED;
+        } elseif ($newStage === VendorStage::APPROVED) {
+            $this->status = VendorStatus::APPROVED;
+        } elseif ($action === 'submitted' && $this->status === VendorStatus::REJECTED) {
+            // Reset to pending if resubmitting after rejection
+            $this->status = VendorStatus::PENDING;
+        }
+        
+        $this->save();
 
-            // Log to history
-            VendorStageHistory::create([
-                'vendor_id' => $this->id,
-                'stage' => $newStage->value,
-                'action' => $action,
-                'comment' => $comment,
-                'actor_id' => $actorId,
-                'acted_at' => now(),
-            ]);
-        });
-    }
+        // Log to history
+        VendorStageHistory::create([
+            'vendor_id' => $this->id,
+            'stage' => $newStage->value,
+            'action' => $action,
+            'comment' => $comment,
+            'actor_id' => $actorId,
+            'acted_at' => now(),
+        ]);
+    });
+}
 
     // Helper: Can this vendor be acted upon?
     public function canBeActedUpon(): bool
