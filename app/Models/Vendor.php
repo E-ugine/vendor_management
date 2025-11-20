@@ -53,7 +53,6 @@ protected $attributes = [
     public function transitionTo(VendorStage $newStage, string $action, ?string $comment = null, ?int $actorId = null)
 {
     DB::transaction(function () use ($newStage, $action, $comment, $actorId) {
-        // Update vendor stage
         $this->current_stage = $newStage;
         
         // Update status based on action

@@ -16,7 +16,6 @@ class VendorController extends Controller
     // List all vendors (for different views based on stage)
     public function index(Request $request)
     {
-        // We'll implement stage-specific lists later
         $vendors = Vendor::with('creator')->latest()->paginate(15);
         return view('vendors.index', compact('vendors'));
     }
@@ -39,7 +38,6 @@ class VendorController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        // Add documents if provided
         if ($request->has('documents')) {
             foreach ($request->documents as $doc) {
                 if (!empty($doc)) {
@@ -61,7 +59,6 @@ class VendorController extends Controller
             'acted_at' => now(),
         ]);
 
-        // Transition to "With Vendor" stage
         $vendor->transitionTo(
             VendorStage::WITH_VENDOR,
             'submitted',
@@ -73,26 +70,21 @@ class VendorController extends Controller
             ->with('success', 'Vendor created successfully! Awaiting vendor to complete details.');
     }
 
-    // Show vendor details
     public function show(Vendor $vendor)
     {
         $vendor->load(['documents', 'history.actor', 'creator']);
         return view('vendors.show', compact('vendor'));
     }
 
-    // Show edit form (Vendor role)
     public function edit(Vendor $vendor)
     {
         return view('vendors.edit', compact('vendor'));
     }
 
-    // Update vendor (Vendor role)
     public function update(UpdateVendorRequest $request, Vendor $vendor)
 {
-    // Update vendor details
     $vendor->update($request->only(['name', 'email', 'phone', 'address', 'category']));
 
-    // Add new documents if provided
     if ($request->has('documents')) {
         foreach ($request->documents as $doc) {
             if (!empty($doc)) {
@@ -123,7 +115,6 @@ class VendorController extends Controller
         ->with('success', 'Vendor details updated successfully!');
 }
 
-// Review action (approve/reject)
 public function review(Request $request, Vendor $vendor)
 {
     $request->validate([
@@ -135,7 +126,6 @@ public function review(Request $request, Vendor $vendor)
     $comment = $request->input('comment');
 
     if ($action === 'approve') {
-        // Move to next stage
         $nextStage = $vendor->current_stage->nextStage();
         
         if ($nextStage) {
@@ -153,7 +143,6 @@ public function review(Request $request, Vendor $vendor)
             $message = 'Vendor is already at final stage.';
         }
     } else {
-        // Reject - send back to "With Vendor"
         $vendor->transitionTo(
             VendorStage::WITH_VENDOR,
             'rejected',
@@ -173,12 +162,10 @@ public function approved(Request $request)
     $query = Vendor::where('status', VendorStatus::APPROVED)
         ->with('creator');
     
-    // Search by name
     if ($request->filled('search')) {
         $query->where('name', 'LIKE', '%' . $request->search . '%');
     }
     
-    // Filter by category
     if ($request->filled('category')) {
         $query->where('category', $request->category);
     }

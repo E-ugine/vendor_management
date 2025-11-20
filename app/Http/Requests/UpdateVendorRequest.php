@@ -8,7 +8,7 @@ class UpdateVendorRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // In production, check permissions
+        return true;
     }
 
     public function rules(): array

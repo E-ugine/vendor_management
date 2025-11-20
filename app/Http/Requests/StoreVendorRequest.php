@@ -19,7 +19,7 @@ class StoreVendorRequest extends FormRequest
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string'],
             'category' => ['required', 'string', 'in:Supplier,Service Provider,Contractor'],
-            'documents.*' => ['nullable', 'string', 'max:255'], // Just file names for MVP
+            'documents.*' => ['nullable', 'string', 'max:255'], // Assuming documents are file names or paths for simplicity
         ];
     }
 
