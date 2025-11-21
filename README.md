@@ -71,12 +71,15 @@ DB_HOST=db
 DB_PORT=5432
 DB_DATABASE=vendor_management
 DB_USERNAME=vms_user
-DB_PASSWORD=yourpassword
+DB_PASSWORD=vms_password
 
 CACHE_DRIVER=file
 SESSION_DRIVER=file
 QUEUE_CONNECTION=database
 ```
+
+**Note:** 
+The database will be automatically created when Docker starts (configured in `docker-compose.yml`).
 
 ### 3. Start Docker
 ```bash
